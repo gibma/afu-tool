@@ -1,0 +1,52 @@
+﻿extends ./templates/base.pug
+include ./mixin/keypad
+
+block content
+	.container#dtmf
+		.columns
+			.column.col-12
+				h2 DTMF, Mehrfrequenzwahlverfahren 
+		.columns
+			.column.col-6
+				.columns
+					.column.col-12
+						.multi-input
+							.list(v-if='list.length')
+								.chip.chip-sm(track-by='$index', v-for='(idx, item) in list')
+									label.chip-name {{item.sequence}}
+									button.btn.btn-clear(v-on:click='doRemove(idx)')
+							input.form-input.multi.input-xlg#sequence(type='text', placeholder='DTMF Sequenz' v-on:keyup.space='doAdd', v-on:keyup.enter='doSend', v-model='sequence')
+				.columns
+				+keypad([['1', '2', '3', 'A'], ['4', '5', '6', 'B'], ['7', '8', '9', 'C'], ['*', '0', '#', 'D']])
+				.columns
+					.column.col-2: button.largeblockt(type='button' data-tooltip='Eingabefeld leeren' v-bind:disabled='clearDisabled' v-on:click='doClear') C
+					.column.col-8: button.largeblockp(type='button' data-tooltip='DTMF Sequenz senden' v-bind:disabled='sendDisabled' v-on:click='doSend') Senden
+					.column.col-2: button.largeblockt(type='button' data-tooltip='Zur Liste hinzufügen' v-bind:disabled='addDisabled' v-on:click='doAdd') +
+				.columns
+					.column.col-12.options
+						form.form-horizontal
+							.form-group
+								.col-5
+									label.form-label Tastentöne
+								label.form-switch
+									input(type='checkbox')
+									i.form-icon
+							.form-group
+								.col-5
+									label.form-label Geschwindigkeit
+								select.form-select
+									option Normal (250/250)
+									option Motorola (50/50)
+					
+			
+			.column.col-1
+			.column.col-5
+				.columns
+					.column.col-12
+						.card
+							.card-header
+								h4.card-title DTMF
+								h6.card-meta Dual tone multi frequency
+							.card-body
+								| Dies ist ein Test
+						

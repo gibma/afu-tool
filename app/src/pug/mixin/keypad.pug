@@ -1,0 +1,5 @@
+mixin keypad(data)
+	each row in data
+		.columns
+			each col in row
+				.column.col-3: button.largeblock(type='button' v-bind:disabled='keypadDisabled' v-on:click='doKeypress(\'' + col + '\')')= col
