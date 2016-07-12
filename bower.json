@@ -22,6 +22,6 @@
     "tests"
   ],
   "dependencies": {
-    "vue": "^1.0.26"
+    "jquery-mask-plugin": "^1.14.0"
   }
 }
