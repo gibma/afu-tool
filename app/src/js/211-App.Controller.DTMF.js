@@ -1,15 +1,15 @@
-var zvei5tonController = new Vue({
-  el: '#zvei5ton',
+// ---------------------------------------------------------------------------------------------------------
+// Vue DTMF Controller
+App.Controller.DTMF = new Vue({
+  el: '#dtmf',
   
   ready: function() {
-	$('#sequence').mask('ZZZZZW', {
+	$('#sequence').mask('D', {
 		translation: {
-			'Z' : {
-				pattern: /[0-9]/
-			},
-			'W' : {
-				pattern: /[FWEAKP]/i,
-				optional: true				
+			'D' : {
+				pattern: /[0-9a-dA-D*#]/,
+				optional: true,
+				recursive: true
 			}
 		}
 	});
@@ -36,7 +36,7 @@ var zvei5tonController = new Vue({
 		return (!this.sequence.length) || this.isPlaying;
 	},
 	keypadDisabled: function() {
-		return this.isPlaying || this.sequence.length >= 5;
+		return this.isPlaying;
 	}
   },
   

@@ -18,6 +18,11 @@
   vertical-align: middle;
   white-space: nowrap;
 
+  &[disabled] {
+    color: #aaa;
+	border-color: #aaa;
+  }
+  
   &:focus {
     background: lighten(@core-secondary-color, 1%);
   }
@@ -38,6 +43,12 @@
     background: @core-color;
     border-color: darken(@core-color, 5%);
     color: @core-light-color;
+
+	&[disabled] {
+		color: #fff;
+		background: #aaa;
+		border-color: #aaa;
+	}
 
     &:focus {
       background: darken(@core-color, 2%);

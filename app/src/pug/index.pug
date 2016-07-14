@@ -19,8 +19,10 @@ block content
 										button.btn.btn-clear(v-on:click='doRemove(idx)')
 								input.form-input.multi.input-xlg#sequence(type='text', placeholder='5-Ton Folgen' v-on:keyup='doInput' v-on:keyup.space='doAdd', v-on:keyup.enter='doSend', v-model='sequence' )
 							.progress
+							.validation(v-if='inputInvalid')
 				.columns
-				+keypad([['1', '2', '3'], ['4', '5', '6'], ['7', '8', '9'], ['', '0', ''], ['F', 'W', 'A', 'K', 'E', 'P']])
+				+keypad([['1', '2', '3'], ['4', '5', '6'], ['7', '8', '9'], ['', '0', '']], 'keypadDisabled')
+				+keypad([['F', 'W', 'A', '', 'a'],['K', 'E', 'P', '', 'b']], 'extKeypadDisabled')
 				.columns
 					.column.col-2: button.largeblockt(type='button' data-tooltip='Eingabefeld leeren' v-bind:disabled='clearDisabled' v-on:click='doClear') C
 					.column.col-8: button.largeblockp(type='button' data-tooltip='DTMF Sequenz senden' v-bind:disabled='sendDisabled' v-on:click='doSend') Senden
@@ -38,4 +40,5 @@ block content
 								h6.card-meta Analoge Alarmierung
 							.card-body
 								p Zur Alarmierung der deutschen Behörden und Organisationen mit Sicherheitsaufgaben (BOS) im analogen 4m Sprechfunkband wird ein Folgeton Selektivrufverfahren eingesetzt.
+								
 						

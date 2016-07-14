@@ -7,6 +7,7 @@ var gulp = require('gulp'),
   uglify = require('gulp-uglify'),
   cssnano = require('gulp-cssnano'),  
   concat = require('gulp-concat'),
+  order = require('gulp-order'),
   src = './';
 
 var mainBowerFiles = require('main-bower-files');
@@ -29,8 +30,9 @@ gulp.task('compile-less', function(){
 gulp.task('compile-js', function(){
   gulp.src('./app/src/js/*.js')
     .pipe(plumber())
+	.pipe(order(['**/_App.js', '**/App.*.js']))
 	.pipe(uglify())
-	.pipe(concat('all.js'))
+	.pipe(concat('all.js', {newLine: ';'}))
     .pipe(gulp.dest('app/dist/js'));
 });
 
