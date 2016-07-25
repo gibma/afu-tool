@@ -14,7 +14,7 @@ block content
 						.multi-input
 							.input-disable(v-bind:disabled='inputDisabled')
 								.list(v-if='list.length')
-									.chip.chip-sm.list-item(track-by='$index' v-bind:class="{'selected' : item.playing}" v-for='(idx, item) in list')
+									.chip.chip-sm.list-item(track-by='$index' v-bind:class="{'selected' : item.played}" v-for='(idx, item) in list')
 										label.chip-name(v-text='item.sequence')
 										button.btn.btn-clear(v-on:click='doRemove(idx)')
 								input.form-input.multi.input-xlg#sequence(type='text', placeholder='5-Ton Folgen' v-on:keyup='doInput' v-on:keyup.space='doAdd', v-on:keyup.enter='doSend', v-model='sequence' )

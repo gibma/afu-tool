@@ -1,21 +1,32 @@
 // ---------------------------------------------------------------------------------------------------------
 // Vue BOS 5-Ton Controller
+
 App.Controller.BOS5Tone = new Vue({
-  el: '#zvei5ton',
+	
+	el: '#zvei5ton',
   
-  ready: function() {
-	$('#sequence').mask('ZZZZZW', {
-		translation: {
-			'Z' : {
-				pattern: /[0-9]/
-			},
-			'W' : {
-				pattern: /[FWAKEPab]/,
-				optional: true				
+	ready: function() {
+		$('#sequence').mask('ZZZZZW', {
+			translation: {
+				'Z' : {
+					pattern: /[0-9]/
+				},
+				'W' : {
+					pattern: /[FWAKEPab]/,
+					optional: true				
+				}
 			}
-		}
-	});
-  },
+		});
+
+		App.AudioCore.onStart(function(){
+			App.Controller.BOS5Tone.isPlaying = true;
+		});
+	
+		App.AudioCore.onEnd(function(){
+			App.Controller.BOS5Tone.isPlaying = false;
+		});
+	
+	},
   
   data: {
     sequence: '',
@@ -59,7 +70,7 @@ App.Controller.BOS5Tone = new Vue({
 		if (this.sequence.length >= 5) {
 			this.list.push({
 				sequence: this.sequence,
-				playing: false
+				played: false
 			});
 			this.sequence = '';
 			return true;
@@ -80,15 +91,18 @@ App.Controller.BOS5Tone = new Vue({
 		self = this;
 		this.sequence = this.sequence.trim();
 		if (this.list.length) {
-			if (this.doAdd()) {
-				doPlay = true;
-			}			
+			App.AudioCore.stream(function(){
+				for (var idx = 0; idx < self.list.length; idx++) {
+					if (!self.list[idx].played) {
+						self.list[idx].played = true;
+						return App.Encoder.BOS5Tone.encode(self.list[idx].sequence);
+					}
+				}
+				return [];
+			});
 		} else if (this.sequence.length >= 5) {
-			App.Storage.write("lastSequence", this.sequence);
 			App.AudioCore.play(App.Encoder.BOS5Tone.encode(this.sequence));
-		}
-		
-		
+		}		
 	}  
   },
 })

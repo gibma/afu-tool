@@ -1,9 +1,9 @@
 // ---------------------------------------------------------------------------------------------------------
 // Tone generator module
-App.Generator.Tone = (function(window, document, console, Math, audioCore, undefined){
+App.Generator.Tone = (function(window, document, console, math, audioCore, undefined){
 	'use strict'
 
-	const RAD = Math.PI / 180.0;
+	const RAD = math.PI / 180.0;
 	const PERIGON = 360.0;
 	
 	var sampleRate = audioCore.sampleRate;
@@ -13,7 +13,9 @@ App.Generator.Tone = (function(window, document, console, Math, audioCore, undef
 	var correction = 0.0;					
 	var fadeIn = 0.0;
 	var fadeOut = 0.0;								
-				
+	
+	console.log(sampleRate);
+	
 	// -----------------------------------------------------------------------------------------------------
 	// Clear buffer
 	function clear() {
@@ -53,7 +55,7 @@ App.Generator.Tone = (function(window, document, console, Math, audioCore, undef
 					
 		for (var left = 0, right = samples; right > 0; left++, right--) {
 			var amp = getAmplitude(fis, fos, left, right);
-			buffer.push(Math.sin(currentPhase1 * RAD) * amp);
+			buffer.push(math.sin(currentPhase1 * RAD) * amp);
 			currentPhase1 = (currentPhase1 + step1) % PERIGON;						
 		}
 		currentPhase2 = 0.0;
@@ -73,7 +75,7 @@ App.Generator.Tone = (function(window, document, console, Math, audioCore, undef
 					
 		for (var left = 0, right = samples; right > 0; left++, right--) {
 			var amp = getAmplitude(fis, fos, left, right);
-			buffer.push((Math.sin(currentPhase1 * RAD) + Math.sin(currentPhase2 * RAD)) / 2 * amp);
+			buffer.push((math.sin(currentPhase1 * RAD) + math.sin(currentPhase2 * RAD)) / 2 * amp);
 			currentPhase1 = (currentPhase1 + step1) % PERIGON;
 			currentPhase2 = (currentPhase2 + step2) % PERIGON;
 		}
@@ -104,7 +106,7 @@ App.Generator.Tone = (function(window, document, console, Math, audioCore, undef
 		}
 				
 		var rawSamples = sampleRate * (duration / 1000.0);
-		var samples = Math.round(rawSamples);
+		var samples = math.round(rawSamples);
 				
 		if (doCorrection) {
 			correction += (rawSamples - samples);
