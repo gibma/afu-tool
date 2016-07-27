@@ -16,7 +16,7 @@ App.Encoder.BOS5Tone = (function(window, document, console, generator, undefined
 	function encode(sequence) {
 		generator.clear();
 		if (sequence.match(PATTERN)) {
-			generator.fade(5).pause(600);
+			generator.fade(5);
 			cycle(sequence);
 			cycle(sequence);
 			specialTones(sequence);
@@ -27,6 +27,7 @@ App.Encoder.BOS5Tone = (function(window, document, console, generator, undefined
 	// -----------------------------------------------------------------------------------------------------
 	// Encode one cycle
 	function cycle(sequence) {
+		generator.pause(600);
 		var lastDigit = '';
 		for (var idx = 0; idx < 5; idx++) {
 			var digit = sequence.charAt(idx);
@@ -36,13 +37,13 @@ App.Encoder.BOS5Tone = (function(window, document, console, generator, undefined
 			generator.single(getFrequency(digit), 70);
 			lastDigit = digit;
 		}
-		generator.pause(600);
 	}
 	
 	// -----------------------------------------------------------------------------------------------------
 	// Send tones for busy channel indication or siren activation
 	function specialTones(sequence) {
 		if (sequence.length == 6) {
+			generator.pause(600);
 			switch(sequence[5]) {
 				case 'a': { // Busy tone a
 					for (var rep = 0; rep < 10; rep++) {

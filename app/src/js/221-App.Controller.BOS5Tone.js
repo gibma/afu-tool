@@ -20,10 +20,23 @@ App.Controller.BOS5Tone = new Vue({
 
 		App.AudioCore.onStart(function(){
 			App.Controller.BOS5Tone.isPlaying = true;
+			$(".idle").show();
 		});
 	
 		App.AudioCore.onEnd(function(){
 			App.Controller.BOS5Tone.isPlaying = false;
+			App.Controller.BOS5Tone.resetPlayed();
+			$(".progress").width(0);
+			$(".idle").hide();
+		});
+		
+		App.AudioCore.onProgress(function(samplesPlayed){
+			var max = App.Controller.BOS5Tone.sampleCount;
+			var cur = samplesPlayed;
+			var progress = (cur/max)*100;
+			progress = progress > 100 ? 100 : progress;			
+			$(".progress").width(progress + "%");
+			
 		});
 	
 	},
@@ -32,10 +45,10 @@ App.Controller.BOS5Tone = new Vue({
     sequence: '',
 	list: [],
 	isPlaying: false,
-	progress: 0
+	sampleCount: 0
   },
   
-  computed: {	
+  computed: {		
 	inputInvalid: function() {		
 		return this.sequence.length && !this.sequence.match(/[0-9]{5}/);
 	},	
@@ -68,9 +81,11 @@ App.Controller.BOS5Tone = new Vue({
 	doAdd: function() {
 		this.sequence = this.sequence.trim();
 		if (this.sequence.length >= 5) {
+			var data = App.Encoder.BOS5Tone.encode(this.sequence); 
 			this.list.push({
 				sequence: this.sequence,
-				played: false
+				played: false,
+				data: data
 			});
 			this.sequence = '';
 			return true;
@@ -79,7 +94,13 @@ App.Controller.BOS5Tone = new Vue({
 	},
 	
 	doRemove: function(index) {
-		this.list.splice(index, 1);
+		if (typeof index !== 'number') {
+			if (this.list.length > 0) {
+				this.list.pop();
+			}
+		} else {		
+			this.list.splice(index, 1);
+		}
 	},
 	
 	doClear: function() {
@@ -91,18 +112,31 @@ App.Controller.BOS5Tone = new Vue({
 		self = this;
 		this.sequence = this.sequence.trim();
 		if (this.list.length) {
+			for (var idx = 0; idx < self.list.length; idx++) {
+				this.sampleCount += this.list[idx].data.length;
+			}			
+			
 			App.AudioCore.stream(function(){
 				for (var idx = 0; idx < self.list.length; idx++) {
 					if (!self.list[idx].played) {
 						self.list[idx].played = true;
-						return App.Encoder.BOS5Tone.encode(self.list[idx].sequence);
+						return self.list[idx].data;
 					}
 				}
-				return [];
+				return []
 			});
 		} else if (this.sequence.length >= 5) {
-			App.AudioCore.play(App.Encoder.BOS5Tone.encode(this.sequence));
+			var buffer = App.Encoder.BOS5Tone.encode(this.sequence);
+			this.sampleCount = buffer.length;
+			App.AudioCore.play(buffer);
 		}		
-	}  
+	},
+
+	resetPlayed: function(){
+		this.sampleCount = 0;
+		for (var idx = 0; idx < this.list.length; idx++) {
+			this.list[idx].played = false;
+		}
+	}
   },
 })

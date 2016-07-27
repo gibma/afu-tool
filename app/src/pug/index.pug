@@ -17,7 +17,9 @@ block content
 									.chip.chip-sm.list-item(track-by='$index' v-bind:class="{'selected' : item.played}" v-for='(idx, item) in list')
 										label.chip-name(v-text='item.sequence')
 										button.btn.btn-clear(v-on:click='doRemove(idx)')
-								input.form-input.multi.input-xlg#sequence(type='text', placeholder='5-Ton Folgen' v-on:keyup='doInput' v-on:keyup.space='doAdd', v-on:keyup.enter='doSend', v-model='sequence' )
+								input.form-input.multi.input-xlg#sequence(type='text', placeholder='5-Ton Folgen' v-on:keyup='doInput' v-on:keyup.46='doRemove' v-on:keyup.space='doAdd', v-on:keyup.enter='doSend', v-model='sequence' )
+							.idle
+								.spinner
 							.progress
 							.validation(v-if='inputInvalid')
 				.columns

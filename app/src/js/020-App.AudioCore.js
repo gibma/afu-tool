@@ -2,38 +2,48 @@
 // AudioCore module
 App.AudioCore = (function(window, document, console, undefined){
 	'use strict'
+	const BUFFER_SIZE = 2048;
 	
 	var provider = new window.AudioContext();
 	var sampleRate = provider.sampleRate;
-	var streamNode = provider.createScriptProcessor(4096, 1, 1);
+	var streamNode = provider.createScriptProcessor(BUFFER_SIZE, 1, 1);
 	var streamBuffer = [];
 	var streamCallback = function(){ return [] };
 	var callbacks = {
 		onStart : function(){},
-		onEnd : function(){}
+		onEnd : function(){},
+		onProgress : function() {}
 	};
+	var end = 0;
+	var progress;
 	
 	streamNode.onaudioprocess = function(event) {
 		var outBuffer = event.outputBuffer.getChannelData(0);
+		
+		progress += BUFFER_SIZE;
+		if (progress > 0) {
+			callbacks.onProgress(progress);
+		}
 		
 		if (streamBuffer.length < outBuffer.length) {
 			streamBuffer = streamBuffer.concat(streamCallback());
 		}
 		
 		if (streamBuffer.length == 0) {
+			end++;
+		}
+		
+		if (end == 2) {
 			streamNode.disconnect();
 			callbacks.onEnd();
-			console.log("0");
 		}		
 		
 		while(streamBuffer.length < outBuffer.length) {
 			streamBuffer.push(0);
 		}
-		
-		for (var idx = 0; idx < outBuffer.length; idx++) {
-			outBuffer[idx] = streamBuffer.shift();
+
+		outBuffer.set(streamBuffer.splice(0, outBuffer.length));
 		}
-	}
 	
 	// -----------------------------------------------------------------------------------------------------
 	// Check if audioContext is available
@@ -49,20 +59,18 @@ App.AudioCore = (function(window, document, console, undefined){
 	}
 	
 	// -----------------------------------------------------------------------------------------------------
-	// Check if audioContext is available
+	// Play buffer
 	function play(encodedData) {
-		callbacks.onStart();
-		
-		var buffer = provider.createBuffer(1, encodedData.length, sampleRate);
-		buffer.getChannelData(0).set(encodedData);
-			
-		var bufferNode = provider.createBufferSource();
-		bufferNode.buffer = buffer;
-		bufferNode.connect(provider.destination);
-		bufferNode.start(0);	
+		stream(function(){
+			var dummy = encodedData;
+			encodedData = [];
+			return dummy;
+		})
 	}
 	
 	function stream(callback) {
+		end = 0;
+		progress = -2 * BUFFER_SIZE;
 		callbacks.onStart();
 		streamCallback = callback;
 		streamNode.connect(provider.destination);		
@@ -77,6 +85,10 @@ App.AudioCore = (function(window, document, console, undefined){
 	}
 
 	
+	function onProgress(callback) {
+		callbacks.onProgress = callback;
+	}
+	
 	// -----------------------------------------------------------------------------------------------------
 	// Public interface
 	return {
@@ -84,7 +96,8 @@ App.AudioCore = (function(window, document, console, undefined){
 		play           : play,
 		stream         : stream,
 		onStart        : onStart,
-		onEnd		   : onEnd
+		onEnd		   : onEnd,
+		onProgress     : onProgress,
 	};	
 
 })(window, document, console);
