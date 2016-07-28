@@ -12,16 +12,14 @@ block content
 				.columns
 					.column.col-12
 						.multi-input
-							.input-disable(v-bind:disabled='inputDisabled')
+							.input-disable(v-bind:disabled='isPlaying')
 								.list(v-if='list.length')
 									.chip.chip-sm.list-item(track-by='$index' v-bind:class="{'selected' : item.played}" v-for='(idx, item) in list')
 										label.chip-name(v-text='item.sequence')
 										button.btn.btn-clear(v-on:click='doRemove(idx)')
-								input.form-input.multi.input-xlg#sequence(type='text', placeholder='5-Ton Folgen' v-on:keyup='doInput' v-on:keyup.46='doRemove' v-on:keyup.space='doAdd', v-on:keyup.enter='doSend', v-model='sequence' )
-							.idle
-								.spinner
-							.progress
-							.validation(v-if='inputInvalid')
+								input.form-input.multi.input-xlg#sequence(type='text' tabindex='1' placeholder='5-Ton Folgen' v-on:paste='doPaste' v-on:keyPress='doKeypress' v-on:keydown='doKeydown' v-model='sequence' )
+							.validation(v-show='inputInvalid')
+							.progress(v-bind:style='progressStyle')
 				.columns
 				+keypad([['1', '2', '3'], ['4', '5', '6'], ['7', '8', '9'], ['', '0', '']], 'keypadDisabled')
 				+keypad([['F', 'W', 'A', '', 'a'],['K', 'E', 'P', '', 'b']], 'extKeypadDisabled')

@@ -4,4 +4,4 @@ mixin keypad(data, disabledFunction)
 			each col in row
 				.column(class='col-' + (12 / row.length))
 					if col.length
-						button.largeblock(type='button' v-bind:disabled=disabledFunction v-on:click='doKeypress(\'' + col + '\')')= col
+						button.largeblock(type='button' v-bind:disabled=disabledFunction v-on:click='doInput(\'' + col + '\')')= col

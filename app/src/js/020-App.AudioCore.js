@@ -70,7 +70,7 @@ App.AudioCore = (function(window, document, console, undefined){
 	
 	function stream(callback) {
 		end = 0;
-		progress = -2 * BUFFER_SIZE;
+		progress = -BUFFER_SIZE;
 		callbacks.onStart();
 		streamCallback = callback;
 		streamNode.connect(provider.destination);		

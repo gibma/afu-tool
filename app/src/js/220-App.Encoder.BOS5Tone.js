@@ -3,19 +3,23 @@
 App.Encoder.BOS5Tone = (function(window, document, console, generator, undefined){
 	'use strict'
 	
-	const PATTERN = /[0-9]{5}[FWAKEPab]?/;
+	const PATTERN = /^[0-9]{5}[FWAKEPab]?$/;
+	const VALID = "00000F";
 	const FREQS = [1060, 1160, 1270, 1400, 1530, 1670, 1830, 2000, 2200, 2400, 2600];
 	const DIGITS = "1234567890R";
 	const SIREN_FREQS = [675, 825, 1240, 1860];
 	const SIREN_TONES = [[0,2], [0,1], [2,3], [1,2], [1,3], [0,3]];
 	const SIREN_DIGITS = "FWAKEP";
 
+	function validate(sequence, partial) {
+		return (partial === true ? sequence + VALID.substr(sequence.length) : sequence).match(PATTERN);
+	}
 	
 	// -----------------------------------------------------------------------------------------------------
 	// Encode the given BOS 5-Tone sequence
 	function encode(sequence) {
 		generator.clear();
-		if (sequence.match(PATTERN)) {
+		if (validate(sequence)) {
 			generator.fade(5);
 			cycle(sequence);
 			cycle(sequence);
@@ -89,7 +93,8 @@ App.Encoder.BOS5Tone = (function(window, document, console, generator, undefined
 	// -----------------------------------------------------------------------------------------------------
 	// Public interface
 	return {
-		encode : encode
+		validate : validate,
+		encode  : encode
 	}
 	
 	

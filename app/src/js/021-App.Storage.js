@@ -1,10 +1,6 @@
 // ---------------------------------------------------------------------------------------------------------
-// Namespace
-var App = App || {};
-
-// ---------------------------------------------------------------------------------------------------------
 // Storage module
-App.Storage = (function(window, document, console, $, undefined){
+App.Storage = (function(window, document, console, undefined){
 	'use strict'
 	
 	var provider = window.localStorage;
@@ -50,4 +46,4 @@ App.Storage = (function(window, document, console, $, undefined){
 		remove      : remove
 	};	
 
-})(window, document, console, jQuery);
+})(window, document, console);
