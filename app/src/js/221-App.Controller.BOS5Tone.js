@@ -6,30 +6,36 @@ App.Controller.BOS5Tone = new Vue({
 	el: '#zvei5ton',
   
 	ready: function() {
-		this.core.onStart(this.onStart);	
-		this.core.onEnd(this.onStop);		
-		this.core.onProgress(this.onProgress);
+		this.audio.onStart(this.onStart);	
+		this.audio.onEnd(this.onStop);		
+		this.audio.onProgress(this.onProgress);
+		this.audio.init();
+		this.isReady = true;
 	},
   
   data: {
-	core        : App.AudioCore,
+	audio       : App.AudioCore,
 	encoder     : App.Encoder.BOS5Tone,   
     sequence    : '',
 	list        : [],
 	isPlaying   : false,
 	sampleCount : 0,
-	progress    : 0.0
+	progress    : 0.0,
+	isReady     : false
   },
   
-  computed: {		
+  computed: {	
+	audioSupported: function() {
+		return this.audio.isSupported();
+	},
 	inputInvalid: function() {		
 		return this.sequence.length && !this.encoder.validate(this.sequence);
 	},	
 	clearDisabled: function() {
 		return this.isPlaying || (!this.list.length && !this.sequence.length);
 	},
-	sendDisabled: function() {
-		return this.isPlaying || (!this.list.length && !this.encoder.validate(this.sequence));
+	sendDisabled: function() {		
+		return this.isPlaying || (this.sequence.length && !this.encoder.validate(this.sequence)) || (!this.sequence.length && !this.list.length);
 	},
 	addDisabled: function() {
 		return this.isPlaying || !this.encoder.validate(this.sequence);
@@ -41,7 +47,7 @@ App.Controller.BOS5Tone = new Vue({
 		return this.isPlaying || this.sequence.length != 5;
 	},
 	progressStyle: function() {
-		return "transform: scaleX(" + this.progress + ")";
+		return "width: " + this.progress + "%";
 	}
   },
   
@@ -61,7 +67,7 @@ App.Controller.BOS5Tone = new Vue({
 	},
 	
 	onProgress: function(cur) {
-		this.progress = (cur / this.sampleCount);
+		this.progress = (cur / this.sampleCount) * 100;
 	},
 	
 	isValid: function(sequence, partial) {
@@ -92,6 +98,10 @@ App.Controller.BOS5Tone = new Vue({
 			switch(event.keyCode) {
 				case 13: {
 					this.doSend();
+					break;
+				}
+				case 27: {
+					this.doClear();
 					break;
 				}
 				case 32: {

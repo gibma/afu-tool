@@ -1,12 +1,17 @@
-﻿extends ./templates/base.pug
-include ./mixin/keypad
+﻿extends ./../../templates/base.pug
+include ./../../mixin/keypad
 
 block content
-
+	nav.main
+		h1 BOS 5-Ton Folgen
+			
 	.container#zvei5ton
+		.load(v-show='!isReady')
 		.columns
 			.column.col-12
-				h2 5-Ton Folgen nach ZVEI
+				.toast.toast-danger(v-show='!audioSupported')
+					| Ihr Browser unterstützt keine Audio Wiedergabe!
+		
 		.columns
 			.column.col-6
 				.columns
@@ -27,8 +32,6 @@ block content
 					.column.col-2: button.largeblockt(type='button' data-tooltip='Eingabefeld leeren' v-bind:disabled='clearDisabled' v-on:click='doClear') C
 					.column.col-8: button.largeblockp(type='button' data-tooltip='DTMF Sequenz senden' v-bind:disabled='sendDisabled' v-on:click='doSend') Senden
 					.column.col-2: button.largeblockt(type='button' data-tooltip='Zur Liste hinzufügen' v-bind:disabled='addDisabled' v-on:click='doAdd') +
-	
-					
 			
 			.column.col-1
 			.column.col-5

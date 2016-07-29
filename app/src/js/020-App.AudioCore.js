@@ -2,60 +2,73 @@
 // AudioCore module
 App.AudioCore = (function(window, document, console, undefined){
 	'use strict'
-	const BUFFER_SIZE = 2048;
+	
+	const BLOCK_SIZE = 2048;
 	
 	var provider = new window.AudioContext();
 	var sampleRate = provider.sampleRate;
-	var streamNode = provider.createScriptProcessor(BUFFER_SIZE, 1, 1);
-	var streamBuffer = [];
-	var streamCallback = function(){ return [] };
+	var streamNode = provider.createScriptProcessor(BLOCK_SIZE, 1, 1);
+	var queue = [];
+	var isActive = false;
+	var shouldStop = false;
+	var progress = 0;
+
 	var callbacks = {
 		onStart : function(){},
 		onEnd : function(){},
-		onProgress : function() {}
+		onProgress : function() {},
+		onFillBuffer : function() { return [] }
 	};
-	var end = 0;
-	var progress;
 	
 	streamNode.onaudioprocess = function(event) {
-		var outBuffer = event.outputBuffer.getChannelData(0);
+		var output = event.outputBuffer.getChannelData(0);
 		
-		progress += BUFFER_SIZE;
-		if (progress > 0) {
+		if (shouldStop) {
+			progress += BLOCK_SIZE;
 			callbacks.onProgress(progress);
-		}
-		
-		if (streamBuffer.length < outBuffer.length) {
-			streamBuffer = streamBuffer.concat(streamCallback());
-		}
-		
-		if (streamBuffer.length == 0) {
-			end++;
-		}
-		
-		if (end == 2) {
-			streamNode.disconnect();
 			callbacks.onEnd();
-		}		
+			isActive = false;
+			
+			for (var idx = 0; idx < BLOCK_SIZE; idx++) {
+				output[idx] = 0;
+			}
+		}
 		
-		while(streamBuffer.length < outBuffer.length) {
-			streamBuffer.push(0);
-		}
+		if (isActive) {
+			progress += BLOCK_SIZE;
+			callbacks.onProgress(progress);
 
-		outBuffer.set(streamBuffer.splice(0, outBuffer.length));
+			if (queue.length < BLOCK_SIZE) {
+				while (queue.length < BLOCK_SIZE) {
+					var buffer = callbacks.onFillBuffer();
+					if (!buffer.length) {
+						shouldStop = true;
+						break;
+					}
+					for (var to = queue.length, from = 0; from < buffer.length; from++, to++){
+						queue[to] = buffer[from];
+					}	
+				}
+				for (var idx = queue.length; idx < BLOCK_SIZE; idx++) {
+					queue[idx] = 0;
+				}
+			}
+		
+			for (var idx = 0; idx < BLOCK_SIZE; idx++) {
+				output[idx] = queue[idx];
+			}
+		
+			for (var to = 0, from = BLOCK_SIZE; from < queue.length; to++, from++) {
+				queue[to] = queue[from];			
+			}
+			queue.length -= BLOCK_SIZE;
 		}
+	}	
 	
 	// -----------------------------------------------------------------------------------------------------
-	// Check if audioContext is available
-	function isAvailable() {
-		var msg = "App.AudioCore check for audioContext : ";
-
-		if ('AudioContext' in window) {
-			console.log(msg + "available");
-		} else {
-			console.log(msg + "!!NOT!! available");
-			alert("Teile der Anwendung [App.AudioCore] funktionieren in Ihrem Browser nicht!");
-		}	
+	// Check if audioContext is supported
+	function isSupported() {
+		return ('AudioContext' in window);
 	}
 	
 	// -----------------------------------------------------------------------------------------------------
@@ -68,12 +81,13 @@ App.AudioCore = (function(window, document, console, undefined){
 		})
 	}
 	
-	function stream(callback) {
-		end = 0;
-		progress = -BUFFER_SIZE;
-		callbacks.onStart();
-		streamCallback = callback;
-		streamNode.connect(provider.destination);		
+	function stream(callback) {	
+		queue = [];
+		progress = 0;
+		shouldStop = false;
+		callbacks.onFillBuffer = callback;
+		callbacks.onStart();		
+		isActive = true;		
 	}
 	
 	function onStart(callback) {
@@ -83,15 +97,20 @@ App.AudioCore = (function(window, document, console, undefined){
 	function onEnd(callback) {
 		callbacks.onEnd = callback;
 	}
-
 	
 	function onProgress(callback) {
 		callbacks.onProgress = callback;
 	}
 	
+	function init() {
+		streamNode.connect(provider.destination);
+	}
+	
 	// -----------------------------------------------------------------------------------------------------
 	// Public interface
 	return {
+		isSupported    : isSupported,
+		init           : init,
 		sampleRate     : sampleRate,
 		play           : play,
 		stream         : stream,

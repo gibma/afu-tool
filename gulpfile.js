@@ -45,7 +45,7 @@ gulp.task('js-dependencies', function() {
 });
 
 gulp.task('compile-pug', function buildHTML() {
-  return gulp.src(src + 'app/src/pug/*.pug')
+  return gulp.src(src + 'app/src/pug/content/**/*.pug')
   .pipe(plumber())
   .pipe(pug({
     pretty: true
