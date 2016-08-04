@@ -1,71 +1,74 @@
-var gulp = require('gulp'),
-  less = require('gulp-less'),
-  browserSync = require('browser-sync').create(),
-  pug = require('gulp-pug'),
-  plumber = require('gulp-plumber'),
-  watch = require('gulp-watch'),
-  uglify = require('gulp-uglify'),
-  cssnano = require('gulp-cssnano'),  
-  concat = require('gulp-concat'),
-  order = require('gulp-order'),
-  src = './';
+const gulp = require('gulp');  
+const uglify = require('gulp-uglify');
+const concat = require('gulp-concat');  
+const merge = require('merge-stream');
+const pug = require('gulp-pug');
+const cssnano = require('gulp-cssnano');
 
-var mainBowerFiles = require('main-bower-files');
+const serve = require('browser-sync').create();
 
-  var LessPluginAutoPrefix = require('less-plugin-autoprefix');
+const src = './app/src/';
+const dist = './app/dist/';
 
-var autoprefix= new LessPluginAutoPrefix({ browsers: ["last 2 versions"] });
-  
-gulp.task('compile-less', function(){
-  gulp.src(['./app/src/less/spectre.less', './app/src/less/main.less'])
-    .pipe(plumber())
-    .pipe(less({
-            plugins: [autoprefix]
-        }))    
-	.pipe(cssnano())
-	.pipe(concat('all.css'))
-    .pipe(gulp.dest('app/dist/css'));
+const modules = [ 'bos5tone', 'dtmf' ];
+
+gulp.task('js', function(){
+	tasks = modules.map(function(name){
+		return gulp.src([src + 'js/*.js', src + 'js/' + name + '/*.js'])
+			.pipe(uglify())
+			.pipe(concat('signaling.js', {newLine: '\r\n\r\n'}))
+			.pipe(gulp.dest(dist + name));			
+	});
+	
+	return merge(tasks);
 });
 
-gulp.task('compile-js', function(){
-  gulp.src('./app/src/js/*.js')
-    .pipe(plumber())
-	.pipe(order(['**/_App.js', '**/App.*.js']))
-	.pipe(uglify())
-	.pipe(concat('all.js', {newLine: ';'}))
-    .pipe(gulp.dest('app/dist/js'));
+gulp.task('pug', function(){
+	tasks = modules.map(function(name){
+		return gulp.src(src + 'pug/' + name + '/*.pug')
+			.pipe(pug())			
+			.pipe(gulp.dest(dist + name));			
+	});
+	
+	return merge(tasks);
 });
 
-gulp.task('js-dependencies', function() {
-    return gulp.src(mainBowerFiles())
-		.pipe(plumber())
-		.pipe(uglify())
-		.pipe(concat('deps.js'))
-        .pipe(gulp.dest('app/dist/js'))
+gulp.task('css', function(){
+	tasks = modules.map(function(name){
+		return gulp.src(src + 'css/*.css')
+			.pipe(concat('signaling.css', {newLine: '\r\n\r\n'}))			
+			.pipe(cssnano())
+			.pipe(gulp.dest(dist + name))			
+			.pipe(gulp.dest(dist));					
+	});
+	
+	return merge(tasks);
 });
 
-gulp.task('compile-pug', function buildHTML() {
-  return gulp.src(src + 'app/src/pug/content/**/*.pug')
-  .pipe(plumber())
-  .pipe(pug({
-    pretty: true
-  }))
-  .pipe(gulp.dest(src + 'app/dist'));
+gulp.task('index', function(){
+	return gulp.src(src + 'pug/index.pug')
+		.pipe(pug())			
+		.pipe(gulp.dest(dist));			
 });
 
-gulp.task('browser-refresh', function() {
-    browserSync.reload({stream: true});
+gulp.task('refresh', function() {
+    serve.reload({
+		stream: true
+	});
 });
 
 gulp.task('watch', function() {
-  browserSync.init({
+  serve.init({
     server: {
-      baseDir: src + 'app/dist'
-    }
+      baseDir: dist
+    },
+	open: false,
+	ui: false
   });
-  gulp.watch('app/src/less/**/*.less', {cwd: src}, ['compile-less', 'browser-refresh']);
-  gulp.watch('app/src/pug/**/*.pug', {cwd: src}, ['compile-pug', 'browser-refresh']);
-  gulp.watch('app/src/js/**/*.js', {cwd: src}, ['compile-js', 'browser-refresh']);
+  
+  gulp.watch('pug/**/*.pug', {cwd: src}, ['index', 'pug', 'refresh']);
+  gulp.watch('js/**/*.js', {cwd: src}, ['js', 'refresh']);
+  gulp.watch('css/**/*.css', {cwd: src}, ['css', 'refresh']);
 });
 
-gulp.task('default', ['compile-less', 'compile-pug', 'compile-js', 'js-dependencies']);
+gulp.task('default', ['index', 'pug', 'js', 'css']);

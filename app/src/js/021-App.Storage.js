@@ -1,7 +1,7 @@
 // ---------------------------------------------------------------------------------------------------------
 // Storage module
 App.Storage = (function(window, document, console, undefined){
-	'use strict'
+	"use strict";
 	
 	var provider = window.localStorage;
 	

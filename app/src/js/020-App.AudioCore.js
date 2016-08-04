@@ -1,7 +1,7 @@
 // ---------------------------------------------------------------------------------------------------------
 // AudioCore module
 App.AudioCore = (function(window, document, console, undefined){
-	'use strict'
+	"use strict";
 	
 	const BLOCK_SIZE = 2048;
 	

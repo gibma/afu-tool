@@ -1,7 +1,7 @@
 // ---------------------------------------------------------------------------------------------------------
 // BOS 5-Tone encoder module
 App.Encoder.BOS5Tone = (function(window, document, console, generator, undefined){
-	'use strict'
+	"use strict";
 	
 	const PATTERN = /^[0-9]{5}[FWAKEPab]?$/;
 	const VALID = "00000F";

@@ -1,7 +1,7 @@
 // ---------------------------------------------------------------------------------------------------------
 // DTMF encoder module
 App.Encoder.DTMF = (function(window, document, console, generator, undefined){
-	'use strict'
+	"use strict";
 	
 	const PATTERN = /[0-9A-D*#]+/i;
 	const FREQS = [697, 770, 852, 941, 1209, 1336, 1477, 1633];

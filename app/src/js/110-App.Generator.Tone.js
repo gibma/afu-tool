@@ -1,7 +1,7 @@
 // ---------------------------------------------------------------------------------------------------------
 // Tone generator module
 App.Generator.Tone = (function(window, document, console, math, audioCore, undefined){
-	'use strict'
+	"use strict";
 
 	const RAD = math.PI / 180.0;
 	const PERIGON = 360.0;
